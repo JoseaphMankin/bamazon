@@ -2,6 +2,7 @@ const mysql = require("mysql");
 const inquirer = require("inquirer");
 const chalk = require("chalk");
 
+//Create Connection to mySQL
 const connection = mysql.createConnection({
     host: "localhost",
 
@@ -16,6 +17,7 @@ const connection = mysql.createConnection({
     database: "bamazonDB"
 });
 
+//Loading of Main Menu
 connection.connect(function (err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId);
@@ -27,9 +29,12 @@ connection.connect(function (err) {
   Your One Stop Spot to Shop at a One Stop Shopping Spot!!
 
   `))
+    
     queryAll();
 });
 
+
+//Function that displays all current inventory
 function queryAll() {
     connection.query("SELECT * FROM products", function (err, res) {
         res.forEach(item => {
@@ -39,6 +44,7 @@ function queryAll() {
     })
 }
 
+//Function that Inquires customer to select an item ID and quantity to purchase
 function mainMenu() {
     inquirer.prompt([
         {
@@ -67,18 +73,20 @@ function mainMenu() {
     ]).then(function (response) {
         console.log("You want item: " + response.ID + "\nYou want this many: " + response.quantity);
         checkQuant(response.ID, response.quantity)
-        // connection.end();
 
     });
 
 }
 
+//Function to check if there's suffecient inventory, and if so, complete the sale
 function checkQuant(id, quantity) {
     let query = `SELECT * FROM products WHERE item_id = ${id}`
 
     connection.query(query, function (err, res) {
         let stockQuant = res[0].stock_quantity;
+        let currentSales = res[0].product_sales;
         let itemPrice = res[0].price;
+        let total = quantity * itemPrice
 
         if (quantity > stockQuant) {
             console.log("Insufficient quantity!")
@@ -86,10 +94,13 @@ function checkQuant(id, quantity) {
         } else {
 
             connection.query(
-                "UPDATE products SET ? WHERE ?",
+                "UPDATE products SET ?, ? WHERE ?",
                 [
                     {
                         stock_quantity: stockQuant - quantity
+                    },
+                    {
+                        product_sales: currentSales + total
                     },
                     {
                         item_id: id
@@ -98,7 +109,7 @@ function checkQuant(id, quantity) {
                 function (error) {
                     if (error) throw err;
                     console.log("Order placed successfully!");
-                    console.log("Your total price is: $" + (quantity * itemPrice))
+                    console.log("Your total price is: $" + (total))
                     buyAgain();
                 }
             );
@@ -126,3 +137,5 @@ function buyAgain() {
 
     });
 }
+
+
