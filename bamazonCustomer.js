@@ -20,13 +20,13 @@ connection.connect(function (err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId);
     console.log(chalk.blue(`
-  ***************************
-  ** Welcome to bAmazon **
-  ***************************
+  ********************************************************
+  **                 Welcome to bAmazon                 **
+  ********************************************************
 
-  Your One Stop Shop to Shop fo One Stop Shop Stops
+  Your One Stop Spot to Shop at a One Stop Shopping Spot!!
+
   `))
-    // dispatch();
     queryAll();
 });
 
@@ -46,9 +46,9 @@ function mainMenu() {
             message: "What is the ID of the item you like to purchase?",
             type: "input",
             validate: function (value) {
-                if (isNaN(value) === false){
+                if (isNaN(value) === false) {
                     return true
-                } 
+                }
                 return false;
             }
         },
@@ -57,138 +57,72 @@ function mainMenu() {
             message: "How many units of the product they would like to buy?",
             type: "input",
             validate: function (value) {
-                if (isNaN(value) === false){
+                if (isNaN(value) === false) {
                     return true
-                } 
+                }
                 return false;
             }
-        } 
+        }
 
     ]).then(function (response) {
         console.log("You want item: " + response.ID + "\nYou want this many: " + response.quantity);
-        checkQuant(response.ID,response.quantity)
+        checkQuant(response.ID, response.quantity)
         // connection.end();
 
     });
 
 }
 
-function checkQuant(id, quantity){
+function checkQuant(id, quantity) {
     let query = `SELECT * FROM products WHERE item_id = ${id}`
 
     connection.query(query, function (err, res) {
-     
-        if (quantity > res[0].stock_quantity){
-            console.log("Insufficient quantity!")
-        } else {
-            //ADD YOUR UPDATING FUNCTION HERE
-            console.log("YOU GOT IT")
-        }
+        let stockQuant = res[0].stock_quantity;
+        let itemPrice = res[0].price;
 
+        if (quantity > stockQuant) {
+            console.log("Insufficient quantity!")
+            buyAgain();
+        } else {
+
+            connection.query(
+                "UPDATE products SET ? WHERE ?",
+                [
+                    {
+                        stock_quantity: stockQuant - quantity
+                    },
+                    {
+                        item_id: id
+                    }
+                ],
+                function (error) {
+                    if (error) throw err;
+                    console.log("Order placed successfully!");
+                    console.log("Your total price is: $" + (quantity * itemPrice))
+                    buyAgain();
+                }
+            );
+
+        }
     });
 
 }
 
-function dispatch() {
+function buyAgain() {
     inquirer.prompt([
         {
-            name: "dispatch",
-            message: "Would you like to POST or BID?",
-            type: "list",
-            choices: ["POST", "BID"]
+            name: "again",
+            message: "Would you like to Buy again?",
+            type: "confirm",
+            default: false
         }
     ]).then(function (response) {
-        if (response.dispatch === "POST") {
-            poster();
+        if (response.again === true) {
+            queryAll();
         } else {
-            bidder();
+            console.log("Okay, thanks for shopping with bAmazon");
+            connection.end();
         }
 
     });
-
 }
-
-// function poster() {
-
-//     let item = "";
-//     let category = "";
-//     let startingBid = "";
-
-//     inquirer.prompt([
-//         {
-//             name: "item",
-//             message: "What is the item you would like to bid?",
-//             type: "input",
-//         }
-//     ]).then(function (itemResp) {
-//         item = itemResp.item;
-
-//         inquirer.prompt([
-//             {
-//                 type: "input",
-//                 message: "What category would you like to place your auction in?",
-//                 name: "category"
-//             }
-//         ]).then(function (catResponse) {
-//             category = catResponse.category
-
-//             inquirer.prompt([
-//                 {
-//                     type: "input",
-//                     message: "What Would You Like Your Starting Bid to Be",
-//                     name: "bid"
-//                 }
-//             ]).then(function (bidResponse) {
-//                 startingBid = bidResponse.bid
-
-
-//                 console.log("HERE'S YOUR AUCTION ITEM!! \nItem: " + item + "\ncategory: " + category + "\nStarting Bid: $" + startingBid)
-//                 inserter(item, category, startingBid);
-//             });
-
-//         });
-
-//     });
-
-// }
-
-// function bidder() {
-
-//     inquirer.prompt([
-//         {
-//             name: "selector",
-//             message: "What item would you like to bid on?",
-//             type: "list",
-//             choices: ["Pearl Harbor 2: The Revenge", "Transformers 14", "Newer Ghostbusters?"]
-//         }
-//     ]).then(function (resp) {
-//         choice = resp.selector
-
-//         console.log("You Chose: " + choice)
-//         connection.end();
-//     });
-
-// }
-
-
-
-// function inserter(item, category, bid) {
-//     const newItem = {
-//         item, category, bid
-//     }
-//     connection.query("INSERT INTO products SET ?", newItem, function (err, res) {
-//         queryAll();
-//     })
-// }
-
-// function addSong() {
-//     console.log("Inserting a new song");
-//     const newSong = {
-//         title: "No Excuses",
-//         artist: "Alice In Chains",
-//         genre: "Grunge"
-//     }
-//     connection.query("INSERT INTO songs SET ?", newSong, function (err, res) {
-//         console.log(res.affectedRows + "")
-//     })
-// }
