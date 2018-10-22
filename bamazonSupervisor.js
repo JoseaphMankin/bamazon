@@ -53,9 +53,10 @@ function dispatch() {
 }
 
 function queryAll() {
-    connection.query("SELECT * FROM departments", function (err, res) {
+    let joinQuery = 'SELECT product_name, products.department_name, products.price, products.stock_quantity, departments.over_head_costs, products.product_sales FROM products INNER JOIN departments ON products.department_name = departments.department_name;'
+    connection.query(joinQuery, function (err, res) {
         res.forEach(item => {
-            console.log(`${item.department_id} | ${item.department_name} | ${item.over_head_costs}`)
+            console.log(`${item.product_name} | ${item.department_name} | ${item.price} | ${item.stock_quantity} | ${item.product_sales} | ${item.over_head_costs}`)
         })
         anythingElse();
     })
