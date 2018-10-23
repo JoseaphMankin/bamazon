@@ -41,5 +41,38 @@ VALUES ( "Books", 500),
 SELECT * FROM products;
 SELECT * FROM departments;
 
+SELECT * FROM departments INNER JOIN products ON products.department_name = departments.department_name;
+
+SELECT department_id AS ID, department_name AS DEPT_NAME, over_head_costs 
+AS OVER_HEAD_COSTS, (over_head_costs * 20) AS Total_Profits FROM departments;
+
+Select department_id AS department_id, department_name AS department_name, over_head_costs 
+AS over_head_costs, total_sales AS total_sales, (total_sales - over_head_costs) AS total_profit FROM departments;
+
 SELECT product_name, products.department_name, products.price, products.stock_quantity, departments.over_head_costs, products.product_sales
-FROM products INNER JOIN departments ON products.department_name = departments.department_name;
+FROM products
+INNER JOIN departments ON products.department_name = departments.department_name
+GROUP BY department_name;
+
+SELECT departments.department_name, departments.over_head_cost, products.product_sales
+FROM departments
+INNER JOIN products
+ON departments.department_name = products.department_name;
+
+SELECT department_name AS 'Department Name', SUM(departments.over_head_costs) AS 'Overhead Costs', SUM(products.product_sales) AS 'Total Sales' 
+FROM departments
+INNER JOIN departments on products.department_name = departments.department_name
+GROUP BY departments.department_name;
+
+SELECT department_name AS 'Department Name', SUM(departments.over_head_costs) AS 'Overhead Cost' FROM departments 
+GROUP BY departments.department_name;	
+
+SELECT department_name AS 'Department Name', SUM(products.product_sales) AS 'Total Sales' FROM products 
+GROUP BY products.department_name;
+
+SELECT departments.department_id AS 'Department ID', departments.department_name AS 'Department Name', 
+departments.over_head_costs AS 'Overhead Costs', SUM(products.product_sales) AS 'Product Sales', 
+(SUM(products.product_sales) - departments.over_head_costs) AS 'Total Profit'  
+FROM departments LEFT JOIN products on products.department_name=departments.department_name
+GROUP BY departments.department_name, departments.department_id, departments.over_head_costs
+ORDER BY departments.department_id;

@@ -1,6 +1,7 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const chalk = require("chalk");
+const cTable = require('console.table');
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -53,11 +54,16 @@ function dispatch() {
 }
 
 function queryAll() {
-    let joinQuery = 'SELECT product_name, products.department_name, products.price, products.stock_quantity, departments.over_head_costs, products.product_sales FROM products INNER JOIN departments ON products.department_name = departments.department_name;'
+    let joinQuery = `SELECT departments.department_id AS 'Department ID', departments.department_name AS 'Department Name', 
+    departments.over_head_costs AS 'Overhead Costs', SUM(products.product_sales) AS 'Product Sales', 
+    (SUM(products.product_sales) - departments.over_head_costs) AS 'Total Profit'  
+    FROM departments LEFT JOIN products on products.department_name=departments.department_name
+    GROUP BY departments.department_name, departments.department_id, departments.over_head_costs
+    ORDER BY departments.department_id;`;
+    
+    
     connection.query(joinQuery, function (err, res) {
-        res.forEach(item => {
-            console.log(`${item.product_name} | ${item.department_name} | ${item.price} | ${item.stock_quantity} | ${item.product_sales} | ${item.over_head_costs}`)
-        })
+        console.table(res);
         anythingElse();
     })
 }
