@@ -70,9 +70,23 @@ GROUP BY departments.department_name;
 SELECT department_name AS 'Department Name', SUM(products.product_sales) AS 'Total Sales' FROM products 
 GROUP BY products.department_name;
 
+SELECT products.product_name AS 'Product Name', products.department_name
+AS 'Department Name', products.price AS 'Price', products.stock_quantity AS 'Quantity in Stock'  
+FROM products;
+
+SELECT products.product_name AS 'Product Name', products.department_name
+    AS 'Department Name', products.price AS 'Price', products.stock_quantity AS 'Quantity in Stock'  
+    FROM products WHERE products.stock_quantity < 5;
+
 SELECT departments.department_id AS 'Department ID', departments.department_name AS 'Department Name', 
-departments.over_head_costs AS 'Overhead Costs', SUM(products.product_sales) AS 'Product Sales', 
+departments.over_head_costs AS 'Overhead Costs', 
+SUM(products.product_sales) AS 'Product Sales', 
 (SUM(products.product_sales) - departments.over_head_costs) AS 'Total Profit'  
-FROM departments LEFT JOIN products on products.department_name=departments.department_name
+FROM departments
+LEFT JOIN products on products.department_name=departments.department_name
 GROUP BY departments.department_name, departments.department_id, departments.over_head_costs
 ORDER BY departments.department_id;
+                        
+
+
+

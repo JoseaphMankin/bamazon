@@ -1,17 +1,12 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const chalk = require("chalk");
+const cTable = require('console.table');
 
 const connection = mysql.createConnection({
     host: "localhost",
-
-    // Your port; if not 3306
     port: 3306,
-
-    // Your username
     user: "root",
-
-    // Your password
     password: "",
     database: "bamazonDB"
 });
@@ -59,19 +54,25 @@ function dispatch() {
 }
 
 function queryAll() {
-    connection.query("SELECT * FROM products", function (err, res) {
-        res.forEach(item => {
-            console.log(`${item.item_id} | ${item.product_name} | ${item.department_name} | ${item.price} | ${item.stock_quantity}`)
-        })
+    let tableQuery = `SELECT products.item_id AS 'Item ID', products.product_name AS 'Product Name', products.department_name
+    AS 'Department Name', products.price AS 'Price', products.stock_quantity AS 'Quantity in Stock'  
+    FROM products;`;
+
+    connection.query(tableQuery, function (err, res) {
+        console.table(res);
         anythingElse();
     })
 }
 
+
+
 function lowInventory() {
-    connection.query("SELECT * FROM products WHERE stock_quantity <= 5", function (err, res) {
-        res.forEach(item => {
-            console.log(`${item.item_id} | ${item.product_name} | ${item.department_name} | ${item.price} | ${item.stock_quantity}`)
-        })
+    let tableQuery = `SELECT products.item_id AS 'Item ID', products.product_name AS 'Product Name', products.department_name
+    AS 'Department Name', products.price AS 'Price', products.stock_quantity AS 'Quantity in Stock'  
+    FROM products WHERE products.stock_quantity < 5;`;
+
+    connection.query(tableQuery, function (err, res) {
+        console.table(res);
         anythingElse();
     })
 
@@ -79,12 +80,13 @@ function lowInventory() {
 
 
 function addInventory() {
-    connection.query("SELECT * FROM products", function (err, res) {
-        res.forEach(item => {
-            console.log(`${item.item_id} | ${item.product_name} | ${item.department_name} | ${item.price} | ${item.stock_quantity}`)
-        })
-
-
+    let tableQuery = `SELECT products.item_id AS 'Item ID', products.product_name AS 'Product Name', products.department_name
+    AS 'Department Name', products.price AS 'Price', products.stock_quantity AS 'Quantity in Stock'  
+    FROM products;`;
+    connection.query(tableQuery, function (err, res) {
+    
+        console.table(res);
+    
         inquirer.prompt([
             {
                 name: "ID",

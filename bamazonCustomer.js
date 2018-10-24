@@ -1,6 +1,7 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const chalk = require("chalk");
+const cTable = require('console.table');
 
 //Create Connection to mySQL
 const connection = mysql.createConnection({
@@ -21,7 +22,7 @@ const connection = mysql.createConnection({
 connection.connect(function (err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId);
-    console.log(chalk.blue(`
+    console.log(chalk.red(`
   ********************************************************
   **                 Welcome to bAmazon                 **
   ********************************************************
@@ -36,10 +37,12 @@ connection.connect(function (err) {
 
 //Function that displays all current inventory
 function queryAll() {
-    connection.query("SELECT * FROM products", function (err, res) {
-        res.forEach(item => {
-            console.log(`${item.item_id} | ${item.product_name} | ${item.department_name} | ${item.price} | ${item.stock_quantity}`)
-        })
+    let tableQuery = `SELECT products.item_id AS 'Item ID', products.product_name AS 'Product Name', products.department_name
+    AS 'Department Name', products.price AS 'Price', products.stock_quantity AS 'Quantity in Stock'  
+    FROM products;`;
+
+    connection.query(tableQuery, function (err, res) {
+        console.table(res);
         mainMenu();
     })
 }
