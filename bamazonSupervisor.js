@@ -38,30 +38,42 @@ function dispatch() {
             name: "dispatch",
             message: "What would you like to oversee?",
             type: "list",
-            choices: ["View Product Sales by Department", "Create New Department"]
+            choices: ["View Product Sales by Department", "Create New Department", "Remove a Department", "Update OverHead Costs", "View All Products", "Remove a Product"]
         }
     ]).then(function (response) {
         switch (response.dispatch) {
             case "View Product Sales by Department":
-                queryAll()
+                queryDepts()
                 break;
             case "Create New Department":
                 addDepartment()
+                break;
+            case "Remove a Department":
+                removeDept();
+                break;
+            case "Update OverHead Costs":
+                updateOverhead()
+                break;
+            case "View All Products":
+                queryProducts()
+                break;
+            case "Remove a Product":
+                removeProduct()
                 break;
         }
     });
 
 }
 
-function queryAll() {
+function queryDepts() {
     let joinQuery = `SELECT departments.department_id AS 'Department ID', departments.department_name AS 'Department Name', 
     departments.over_head_costs AS 'Overhead Costs', SUM(products.product_sales) AS 'Product Sales', 
     (SUM(products.product_sales) - departments.over_head_costs) AS 'Total Profit'  
     FROM departments LEFT JOIN products on products.department_name=departments.department_name
     GROUP BY departments.department_name, departments.department_id, departments.over_head_costs
     ORDER BY departments.department_id;`;
-    
-    
+
+
     connection.query(joinQuery, function (err, res) {
         console.table(res);
         anythingElse();
@@ -95,7 +107,7 @@ function addDepartment() {
                 {
                     department_name: answer.name,
                     over_head_costs: answer.overhead,
-                    
+
                 },
                 function (err) {
                     if (err) throw err;
@@ -103,9 +115,171 @@ function addDepartment() {
                     anythingElse();
                 }
             );
+
+        });
+
+
+};
+
+function updateOverhead() {
+    let tableQuery = `SELECT departments.department_id AS 'Department ID', departments.department_name AS 'Department Name', 
+    departments.over_head_costs AS 'Overhead Costs', SUM(products.product_sales) AS 'Product Sales', 
+    (SUM(products.product_sales) - departments.over_head_costs) AS 'Total Profit'  
+    FROM departments LEFT JOIN products on products.department_name=departments.department_name
+    GROUP BY departments.department_name, departments.department_id, departments.over_head_costs
+    ORDER BY departments.department_id;`;
+    connection.query(tableQuery, function (err, res) {
+
+        console.table(res);
+
+        inquirer.prompt([
+            {
+                name: "ID",
+                message: "What is the ID of the item you like to change the Overhead Costs?",
+                type: "input",
+                validate: function (value) {
+                    if (isNaN(value) === false) {
+                        return true
+                    }
+                    return false;
+                }
+            },
+            {
+                name: "overhead",
+                message: "What is the new overhead costs?",
+                type: "input",
+                validate: function (value) {
+                    if (isNaN(value) === false) {
+                        return true
+                    }
+                    return false;
+                }
+            }
+
+        ]).then(function (response) {
+            let query = `SELECT * FROM departments WHERE department_id = ${response.ID}`;
+            let updateOH = response.overhead;
+          
+            connection.query(query, function (err, res) {
+                let newID = parseInt(res[0].department_id);
+             
+
+                connection.query(
+                    "UPDATE departments SET ? WHERE ?",
+                    [
+                        {
+                            over_head_costs: updateOH
+                        },
+                        {
+                            department_id: newID
+                        }
+                    ],
+                    function (error) {
+                        if (error) throw err;
+                        console.log("Success! Dept ID: " + response.ID + " was updated to: " + updateOH);
+                        anythingElse();
+                    }
+                )
+            });
+        })
+    })
+
+}
+
+function removeProduct() {
+    let tableQuery = `SELECT products.item_id AS 'Item ID', products.product_name AS 'Product Name', products.department_name
+    AS 'Department Name', products.price AS 'Price', products.stock_quantity AS 'Quantity in Stock'  
+    FROM products;`;
+    connection.query(tableQuery, function (err, res) {
+        console.table(res);
+
+    inquirer
+        .prompt([
+            {
+                name: "id",
+                type: "input",
+                message: "What is the ID of the item you'd like to remove?"
+            },
+            {
+                name: "youSure",
+                message: "Are you sure you want to remove this?",
+                type: "confirm",
+                default: false
+            }
+        ])
+        .then(function (answer) {
+            
+            if (answer.youSure === true){
+            connection.query(
+                "DELETE FROM products WHERE products.item_id=" + answer.id + ";",
+                function (err) {
+                    if (err) throw err;
+                    console.log("You have sucessfully removed: " + answer.id + " from the inventory!");
+                    anythingElse();
+                }
+            );
+            } else{
+                anythingElse();
+            }
             
         });
+    })
 };
+
+function removeDept() {
+    let joinQuery = `SELECT departments.department_id AS 'Department ID', departments.department_name AS 'Department Name', 
+    departments.over_head_costs AS 'Overhead Costs', SUM(products.product_sales) AS 'Product Sales', 
+    (SUM(products.product_sales) - departments.over_head_costs) AS 'Total Profit'  
+    FROM departments LEFT JOIN products on products.department_name=departments.department_name
+    GROUP BY departments.department_name, departments.department_id, departments.over_head_costs
+    ORDER BY departments.department_id;`;
+
+    connection.query(joinQuery, function (err, res) {
+        console.table(res);
+
+    inquirer
+        .prompt([
+            {
+                name: "id",
+                type: "input",
+                message: "What is the ID of the Dept you'd like to remove?"
+            },
+            {
+                name: "youSure",
+                message: "Are you sure you want to remove this?",
+                type: "confirm",
+                default: false
+            }
+        ])
+        .then(function (answer) {
+            
+            if (answer.youSure === true){
+            connection.query(
+                "DELETE FROM departments WHERE department_id=" + answer.id + ";",
+                function (err) {
+                    if (err) throw err;
+                    console.log("You have sucessfully removed: " + answer.id + " from the department list!");
+                    anythingElse();
+                }
+            );
+            } else{
+                anythingElse();
+            }
+            
+        });
+    })
+};
+
+function queryProducts() {
+    let tableQuery = `SELECT products.item_id AS 'Item ID', products.product_name AS 'Product Name', products.department_name
+    AS 'Department Name', products.price AS 'Price', products.stock_quantity AS 'Quantity in Stock'  
+    FROM products;`;
+
+    connection.query(tableQuery, function (err, res) {
+        console.table(res);
+        anythingElse();
+    })
+}
 
 function anythingElse() {
     inquirer.prompt([

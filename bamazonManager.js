@@ -32,7 +32,7 @@ function dispatch() {
             name: "dispatch",
             message: "What would you like to manage?",
             type: "list",
-            choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product"]
+            choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product", "Remove a Product"]
         }
     ]).then(function (response) {
         switch (response.dispatch) {
@@ -47,6 +47,9 @@ function dispatch() {
                 break;
             case "Add New Product":
                 addProduct()
+                break;
+            case "Remove a Product":
+                removeProduct()
                 break;
         }
     });
@@ -194,8 +197,59 @@ function addProduct() {
                     anythingElse();
                 }
             );
+
+            connection.query(
+                "INSERT INTO departments SET ?",
+                {
+                    department_name: answer.dept,
+                },
+                function (err) {
+                    if (err) throw err;
+                    
+                }
+            );
             
         });
+};
+
+function removeProduct() {
+    let tableQuery = `SELECT products.item_id AS 'Item ID', products.product_name AS 'Product Name', products.department_name
+    AS 'Department Name', products.price AS 'Price', products.stock_quantity AS 'Quantity in Stock'  
+    FROM products;`;
+    connection.query(tableQuery, function (err, res) {
+        console.table(res);
+
+    inquirer
+        .prompt([
+            {
+                name: "id",
+                type: "input",
+                message: "What is the ID of the item you'd like to remove?"
+            },
+            {
+                name: "youSure",
+                message: "Are you sure you want to remove this?",
+                type: "confirm",
+                default: false
+            }
+        ])
+        .then(function (answer) {
+            
+            if (answer.youSure === true){
+            connection.query(
+                "DELETE FROM products WHERE products.item_id=" + answer.id + ";",
+                function (err) {
+                    if (err) throw err;
+                    console.log("You have sucessfully removed: " + answer.id + " from the inventory!");
+                    anythingElse();
+                }
+            );
+            } else{
+                anythingElse();
+            }
+            
+        });
+    })
 };
 
 function anythingElse() {
