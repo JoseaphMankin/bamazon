@@ -7,14 +7,8 @@ const cTable = require('console.table');
 //Connection to mySQL Database, which holds 2 tables, Products and Departments
 const connection = mysql.createConnection({
     host: "localhost",
-
-    // Your port; if not 3306
     port: 3306,
-
-    // Your username
     user: "root",
-
-    // Your password
     password: "",
     database: "bamazonDB"
 });
@@ -23,7 +17,7 @@ const connection = mysql.createConnection({
 connection.connect(function (err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId);
-    console.log(chalk.red(`
+    console.log(chalk.magenta(`
   ********************************************************
   **                 Welcome to bAmazon                 **
   ********************************************************
@@ -115,7 +109,7 @@ function checkQuant(id, quantity) {
         let total = quantity * itemPrice
 
         if (quantity > stockQuant) {
-            console.log("Insufficient quantity!")
+            console.log(chalk.red("Insufficient quantity!"));
             anythingElse();
         } else {
 
