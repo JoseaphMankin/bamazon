@@ -1,22 +1,19 @@
+//List of requires needed for project.
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const chalk = require("chalk");
 const cTable = require('console.table');
 
+//Connection to mySQL Database, which holds 2 tables, Products and Departments
 const connection = mysql.createConnection({
     host: "localhost",
-
-    // Your port; if not 3306
     port: 3306,
-
-    // Your username
     user: "root",
-
-    // Your password
     password: "",
     database: "bamazonDB"
 });
 
+//Loading of Welcome Screen Menu
 connection.connect(function (err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId);
@@ -32,6 +29,7 @@ connection.connect(function (err) {
 
 });
 
+//Switch statement I like to create to manage High Level menu options
 function dispatch() {
     inquirer.prompt([
         {
@@ -65,6 +63,7 @@ function dispatch() {
 
 }
 
+//Query that joins both Products and Departments, Groups and Sums the same Department and dynamically creates Profits
 function queryDepts() {
     let joinQuery = `SELECT departments.department_id AS 'Department ID', departments.department_name AS 'Department Name', 
     departments.over_head_costs AS 'Overhead Costs', SUM(products.product_sales) AS 'Product Sales', 
@@ -80,6 +79,7 @@ function queryDepts() {
     })
 }
 
+//Function that gives Supervisor the ability to add a Department
 function addDepartment() {
     inquirer
         .prompt([
@@ -121,6 +121,7 @@ function addDepartment() {
 
 };
 
+//Function that gives Supervisor the ability to alter the current overhead.
 function updateOverhead() {
     let tableQuery = `SELECT departments.department_id AS 'Department ID', departments.department_name AS 'Department Name', 
     departments.over_head_costs AS 'Overhead Costs', SUM(products.product_sales) AS 'Product Sales', 
@@ -186,6 +187,19 @@ function updateOverhead() {
 
 }
 
+//Function query to see Product List
+function queryProducts() {
+    let tableQuery = `SELECT products.item_id AS 'Item ID', products.product_name AS 'Product Name', products.department_name
+    AS 'Department Name', products.price AS 'Price', products.stock_quantity AS 'Quantity in Stock'  
+    FROM products;`;
+
+    connection.query(tableQuery, function (err, res) {
+        console.table(res);
+        anythingElse();
+    })
+}
+
+//Function that pulls up Product list and gives Supervisor the ability to remove. (Manager can also do this)
 function removeProduct() {
     let tableQuery = `SELECT products.item_id AS 'Item ID', products.product_name AS 'Product Name', products.department_name
     AS 'Department Name', products.price AS 'Price', products.stock_quantity AS 'Quantity in Stock'  
@@ -226,6 +240,7 @@ function removeProduct() {
     })
 };
 
+//Function that pulls up Dept list and gives Supervisor the ability to remove. (Supervisor exclusive)
 function removeDept() {
     let joinQuery = `SELECT departments.department_id AS 'Department ID', departments.department_name AS 'Department Name', 
     departments.over_head_costs AS 'Overhead Costs', SUM(products.product_sales) AS 'Product Sales', 
@@ -270,17 +285,7 @@ function removeDept() {
     })
 };
 
-function queryProducts() {
-    let tableQuery = `SELECT products.item_id AS 'Item ID', products.product_name AS 'Product Name', products.department_name
-    AS 'Department Name', products.price AS 'Price', products.stock_quantity AS 'Quantity in Stock'  
-    FROM products;`;
-
-    connection.query(tableQuery, function (err, res) {
-        console.table(res);
-        anythingElse();
-    })
-}
-
+//Function to get you back into dispatch if you'd like to run anything else. Otherwise, ends the connection.
 function anythingElse() {
     inquirer.prompt([
         {

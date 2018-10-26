@@ -1,8 +1,10 @@
+//List of requires needed for project.
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const chalk = require("chalk");
 const cTable = require('console.table');
 
+//Connection to mySQL Database, which holds 2 tables, Products and Departments
 const connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -11,6 +13,7 @@ const connection = mysql.createConnection({
     database: "bamazonDB"
 });
 
+//Loading of Welcome Screen Menu
 connection.connect(function (err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId);
@@ -26,6 +29,7 @@ connection.connect(function (err) {
 
 });
 
+//Switch statement I like to create to manage High Level menu options
 function dispatch() {
     inquirer.prompt([
         {
@@ -56,6 +60,7 @@ function dispatch() {
 
 }
 
+//Function for viewing the current inventory
 function queryAll() {
     let tableQuery = `SELECT products.item_id AS 'Item ID', products.product_name AS 'Product Name', products.department_name
     AS 'Department Name', products.price AS 'Price', products.stock_quantity AS 'Quantity in Stock'  
@@ -68,7 +73,7 @@ function queryAll() {
 }
 
 
-
+//Function for viewing any items in the inventory whose stock is less than 5
 function lowInventory() {
     let tableQuery = `SELECT products.item_id AS 'Item ID', products.product_name AS 'Product Name', products.department_name
     AS 'Department Name', products.price AS 'Price', products.stock_quantity AS 'Quantity in Stock'  
@@ -81,7 +86,7 @@ function lowInventory() {
 
 };
 
-
+//Function that gives Manager ability to increase stock numbers
 function addInventory() {
     let tableQuery = `SELECT products.item_id AS 'Item ID', products.product_name AS 'Product Name', products.department_name
     AS 'Department Name', products.price AS 'Price', products.stock_quantity AS 'Quantity in Stock'  
@@ -143,8 +148,7 @@ function addInventory() {
     })
 }
 
-
-
+//Function that gives manager ability to create a product. If the dept is new, it's also added to the Dept Table 
 function addProduct() {
     inquirer
         .prompt([
@@ -212,6 +216,7 @@ function addProduct() {
         });
 };
 
+//Gives manager the ability to delete a product from the Products table
 function removeProduct() {
     let tableQuery = `SELECT products.item_id AS 'Item ID', products.product_name AS 'Product Name', products.department_name
     AS 'Department Name', products.price AS 'Price', products.stock_quantity AS 'Quantity in Stock'  
@@ -252,6 +257,7 @@ function removeProduct() {
     })
 };
 
+//Function to get you back into dispatch if you'd like to run anything else. Otherwise, ends the connection.
 function anythingElse() {
     inquirer.prompt([
         {
