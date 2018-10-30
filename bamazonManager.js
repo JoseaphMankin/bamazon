@@ -77,7 +77,7 @@ function queryAll() {
 function lowInventory() {
     let tableQuery = `SELECT products.item_id AS 'Item ID', products.product_name AS 'Product Name', products.department_name
     AS 'Department Name', products.price AS 'Price', products.stock_quantity AS 'Quantity in Stock'  
-    FROM products WHERE products.stock_quantity < 5;`;
+    FROM products WHERE products.stock_quantity < 6;`;
 
     connection.query(tableQuery, function (err, res) {
         console.table(res);
@@ -211,6 +211,7 @@ function addProduct() {
                     if (err) throw err;
                     
                 }
+                
             );
             
         });

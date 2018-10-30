@@ -27,6 +27,6 @@ Node and SQL Assignment
 - What is the direct link to the project?
   * The code is hosted here: [bAmazon](https://github.com/JoseaphMankin/bamazon).
 - What is the direct link to the demo?
-  * A Video Demo is hosted here: [bAmazon-Demo](https://drive.google.com/file/d/1-zXJy288cNd5Ur8EseXm1lzvDGAPKaZA/view).
+  * A Video Demo is hosted here: [bAmazon-Demo](https://drive.google.com/file/d/1us74GDx7OUh4QXK0Z9YPQXp3xCTjaFSE/view).
 
   
